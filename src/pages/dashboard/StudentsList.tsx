@@ -9,8 +9,10 @@ import { Modal } from '../../components/ui/Modal';
 import { 
   Search, Plus, Download, Upload, Filter, Edit, 
   Trash2, Eye, UserCheck, Phone, Mail, MapPin, Printer,
-  Camera, UploadCloud, Image as ImageIcon, Sparkles 
+  Camera, UploadCloud, Image as ImageIcon, Sparkles,
+  FileSpreadsheet, CheckCircle2, AlertCircle
 } from 'lucide-react';
+import { downloadCSV, generateStudentCSVTemplate, parseStudentsCSV } from '../../lib/csvHelper';
 
 export const StudentsList: React.FC = () => {
   const { t, isBangla } = useLanguage();
@@ -22,7 +24,13 @@ export const StudentsList: React.FC = () => {
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [activeStudent, setActiveStudent] = useState<Student | null>(null);
+
+  // Import CSV State
+  const [importPreview, setImportPreview] = useState<Student[]>([]);
+  const [importFileName, setImportFileName] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
 
   // Form State for Add / Edit
   const [formData, setFormData] = useState<Partial<Student>>({
@@ -161,6 +169,48 @@ export const StudentsList: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  const handleCSVFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportFileName(file.name);
+    setImportError(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = parseStudentsCSV(text, students.length);
+        if (parsed.length === 0) {
+          setImportError(isBangla ? 'সিএসভি ফাইল থেকে কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি। অনুগ্রহ করে নমুনা ফাইলটি অনুসরণ করুন।' : 'No valid student rows found. Please check your CSV format.');
+          setImportPreview([]);
+        } else {
+          setImportPreview(parsed);
+        }
+      } catch (err: any) {
+        setImportError(isBangla ? 'ফাইল পড়তে সমস্যা হয়েছে: ' + err.message : 'Error reading file: ' + err.message);
+        setImportPreview([]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleConfirmImport = () => {
+    if (importPreview.length === 0) return;
+    const updated = StorageService.addStudents(importPreview);
+    setStudents(updated);
+    alert(isBangla 
+      ? `অভিনন্দন! মোট ${importPreview.length} জন শিক্ষার্থীর তথ্য সফলভাবে ডাটাবেজে ইমপোর্ট করা হয়েছে।` 
+      : `Success! ${importPreview.length} students have been successfully imported.`);
+    setIsImportModalOpen(false);
+    setImportPreview([]);
+    setImportFileName('');
+  };
+
+  const handleDownloadTemplate = () => {
+    const template = generateStudentCSVTemplate();
+    downloadCSV('students_import_template.csv', template);
+  };
+
   return (
     <div className="space-y-6">
       
@@ -175,7 +225,7 @@ export const StudentsList: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
             variant="outline"
@@ -183,6 +233,20 @@ export const StudentsList: React.FC = () => {
             icon={<Download className="w-3.5 h-3.5" />}
           >
             {t.common.exportCSV}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setImportPreview([]);
+              setImportFileName('');
+              setImportError(null);
+              setIsImportModalOpen(true);
+            }}
+            icon={<Upload className="w-3.5 h-3.5 text-emerald-600" />}
+          >
+            {isBangla ? 'ইমপোর্ট CSV' : 'Import CSV'}
           </Button>
 
           <Button
@@ -661,6 +725,141 @@ export const StudentsList: React.FC = () => {
           </div>
         </Modal>
       )}
+
+      {/* Import Students from CSV Modal */}
+      <Modal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        title={isBangla ? 'সিএসভি (CSV) ফাইল থেকে শিক্ষার্থী ইমপোর্ট' : 'Bulk Import Students from CSV'}
+        maxWidth="2xl"
+      >
+        <div className="space-y-4 text-xs">
+          {/* Instructions and Download Template */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <FileSpreadsheet className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-bold text-slate-800 dark:text-white">
+                  {isBangla ? 'এক্সেল বা সিএসভি ফরম্যাট' : 'Standard CSV File Format'}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {isBangla 
+                    ? 'সহজে ডেটা সাজাতে আমাদের প্রস্তুতকৃত নমুনা টেমপ্লেটটি ডাউনলোড করে পূরণ করুন' 
+                    : 'Download the pre-formatted sample template, fill it in Excel/Sheets, and upload.'}
+                </p>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleDownloadTemplate}
+              icon={<Download className="w-3.5 h-3.5 text-emerald-600" />}
+              className="shrink-0"
+            >
+              {isBangla ? 'নমুনা টেমপ্লেট' : 'Download Sample CSV'}
+            </Button>
+          </div>
+
+          {/* Upload Area */}
+          <div className="p-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 text-center hover:border-emerald-500 transition-colors">
+            <input
+              id="student-csv-file-input"
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleCSVFileChange}
+              className="hidden"
+            />
+            <label
+              htmlFor="student-csv-file-input"
+              className="flex flex-col items-center justify-center cursor-pointer group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-xs">
+                <UploadCloud className="w-6 h-6" />
+              </div>
+              <p className="font-bold text-sm text-slate-800 dark:text-white mb-0.5">
+                {importFileName ? importFileName : (isBangla ? 'আপনার ডিভাইসের .CSV ফাইল নির্বাচন করুন' : 'Click to select .CSV file')}
+              </p>
+              <p className="text-[11px] text-slate-400">
+                {isBangla ? 'সাপোর্টেড ফরম্যাট: .csv (UTF-8)' : 'Supported format: Comma Separated Values (.csv)'}
+              </p>
+            </label>
+          </div>
+
+          {/* Error Message */}
+          {importError && (
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+              <span>{importError}</span>
+            </div>
+          )}
+
+          {/* Parsed Preview Table */}
+          {importPreview.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>
+                    {isBangla 
+                      ? `${importPreview.length} জন শিক্ষার্থীর তথ্য পাওয়া গেছে:` 
+                      : `Found ${importPreview.length} students ready to import:`}
+                  </span>
+                </p>
+                <span className="text-[10px] text-slate-400">Showing first {Math.min(5, importPreview.length)} rows</span>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 max-h-48 overflow-y-auto">
+                <table className="w-full text-[11px] text-left">
+                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold sticky top-0">
+                    <tr>
+                      <th className="py-2 px-3">Roll</th>
+                      <th className="py-2 px-3">Name</th>
+                      <th className="py-2 px-3">Class & Section</th>
+                      <th className="py-2 px-3">Guardian</th>
+                      <th className="py-2 px-3">Phone</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                    {importPreview.slice(0, 5).map((s, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td className="py-1.5 px-3 font-mono font-bold text-emerald-600">{s.rollNo}</td>
+                        <td className="py-1.5 px-3 font-medium text-slate-900 dark:text-white">{s.fullName}</td>
+                        <td className="py-1.5 px-3 text-slate-600 dark:text-slate-300">{s.className} ({s.sectionName})</td>
+                        <td className="py-1.5 px-3 text-slate-600 dark:text-slate-300">{s.guardianName}</td>
+                        <td className="py-1.5 px-3 font-mono text-slate-500">{s.guardianPhone}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsImportModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              disabled={importPreview.length === 0}
+              onClick={handleConfirmImport}
+              icon={<Upload className="w-3.5 h-3.5" />}
+            >
+              {isBangla ? `${importPreview.length} জন শিক্ষার্থী ইমপোর্ট করুন` : `Import ${importPreview.length} Students`}
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
     </div>
   );

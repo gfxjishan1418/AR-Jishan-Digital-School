@@ -58,6 +58,15 @@ export const StorageService = {
     if (isFirebaseConfigured) FirebaseService.syncStudent(student);
     return updated;
   },
+  addStudents: (newStudents: Student[]) => {
+    const list = StorageService.getStudents();
+    const updated = [...newStudents, ...list];
+    StorageService.setStudents(updated);
+    if (isFirebaseConfigured) {
+      newStudents.forEach(s => FirebaseService.syncStudent(s));
+    }
+    return updated;
+  },
   updateStudent: (student: Student) => {
     const list = StorageService.getStudents();
     const updated = list.map(s => s.id === student.id ? student : s);
@@ -77,6 +86,12 @@ export const StorageService = {
   addTeacher: (teacher: Teacher) => {
     const list = StorageService.getTeachers();
     const updated = [teacher, ...list];
+    StorageService.setTeachers(updated);
+    return updated;
+  },
+  addTeachers: (newTeachers: Teacher[]) => {
+    const list = StorageService.getTeachers();
+    const updated = [...newTeachers, ...list];
     StorageService.setTeachers(updated);
     return updated;
   },

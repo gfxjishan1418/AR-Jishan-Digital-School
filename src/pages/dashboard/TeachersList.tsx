@@ -9,15 +9,23 @@ import { Modal } from '../../components/ui/Modal';
 import { 
   Users, Plus, Search, Mail, Phone, BookOpen, 
   Camera, UploadCloud, Image as ImageIcon, Sparkles, 
-  Edit, Trash2, Award, CheckCircle2 
+  Edit, Trash2, Award, CheckCircle2, Download, Upload,
+  FileSpreadsheet, AlertCircle 
 } from 'lucide-react';
+import { downloadCSV, generateTeacherCSVTemplate, parseTeachersCSV } from '../../lib/csvHelper';
 
 export const TeachersList: React.FC = () => {
   const { t, isBangla } = useLanguage();
   const [teachers, setTeachers] = useState<Teacher[]>(() => StorageService.getTeachers());
   const [search, setSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [activeTeacher, setActiveTeacher] = useState<Teacher | null>(null);
+
+  // Import CSV state
+  const [importPreview, setImportPreview] = useState<Teacher[]>([]);
+  const [importFileName, setImportFileName] = useState('');
+  const [importError, setImportError] = useState<string | null>(null);
 
   const TEACHER_AVATAR_PRESETS = [
     { label: 'Female 1', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80' },
@@ -131,6 +139,64 @@ export const TeachersList: React.FC = () => {
     setActiveTeacher(null);
   };
 
+  const handleExportCSV = () => {
+    const headers = ['Employee ID', 'Name', 'Designation', 'Department', 'Qualification', 'Phone', 'Email', 'Status'];
+    const rows = filteredTeachers.map(tea => [
+      tea.employeeId,
+      `"${tea.fullName}"`,
+      `"${tea.designation}"`,
+      `"${tea.department}"`,
+      `"${tea.qualification || ''}"`,
+      tea.phone,
+      tea.email,
+      tea.status,
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    downloadCSV(`Teachers_Directory_DAI_${new Date().toISOString().split('T')[0]}.csv`, csvContent);
+  };
+
+  const handleCSVFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImportFileName(file.name);
+    setImportError(null);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const text = event.target?.result as string;
+        const parsed = parseTeachersCSV(text, teachers.length);
+        if (parsed.length === 0) {
+          setImportError(isBangla ? 'সিএসভি ফাইল থেকে কোনো শিক্ষকের তথ্য পাওয়া যায়নি। অনুগ্রহ করে সঠিক ফরম্যাট যাচাই করুন।' : 'No valid teacher rows found. Please check your CSV format.');
+          setImportPreview([]);
+        } else {
+          setImportPreview(parsed);
+        }
+      } catch (err: any) {
+        setImportError(isBangla ? 'ফাইল পড়তে সমস্যা হয়েছে: ' + err.message : 'Error reading file: ' + err.message);
+        setImportPreview([]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleConfirmImport = () => {
+    if (importPreview.length === 0) return;
+    const updated = StorageService.addTeachers(importPreview);
+    setTeachers(updated);
+    alert(isBangla 
+      ? `অভিনন্দন! মোট ${importPreview.length} জন নতুন শিক্ষক সফলভাবে ডাটাবেজে যুক্ত হয়েছেন।` 
+      : `Success! ${importPreview.length} teachers have been successfully imported.`);
+    setIsImportModalOpen(false);
+    setImportPreview([]);
+    setImportFileName('');
+  };
+
+  const handleDownloadTemplate = () => {
+    const template = generateTeacherCSVTemplate();
+    downloadCSV('teachers_import_template.csv', template);
+  };
+
   return (
     <div className="space-y-6">
       
@@ -145,14 +211,39 @@ export const TeachersList: React.FC = () => {
           </p>
         </div>
 
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={handleOpenAdd}
-          icon={<Plus className="w-3.5 h-3.5" />}
-        >
-          {t.actions.addTeacher}
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExportCSV}
+            icon={<Download className="w-3.5 h-3.5" />}
+          >
+            {t.common.exportCSV}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setImportPreview([]);
+              setImportFileName('');
+              setImportError(null);
+              setIsImportModalOpen(true);
+            }}
+            icon={<Upload className="w-3.5 h-3.5 text-emerald-600" />}
+          >
+            {isBangla ? 'ইমপোর্ট CSV' : 'Import CSV'}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleOpenAdd}
+            icon={<Plus className="w-3.5 h-3.5" />}
+          >
+            {t.actions.addTeacher}
+          </Button>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -470,6 +561,141 @@ export const TeachersList: React.FC = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Import Teachers from CSV Modal */}
+      <Modal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        title={isBangla ? 'সিএসভি (CSV) ফাইল থেকে শিক্ষক তথ্য ইমপোর্ট' : 'Bulk Import Teachers from CSV'}
+        maxWidth="2xl"
+      >
+        <div className="space-y-4 text-xs">
+          {/* Instructions and Download Template */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <FileSpreadsheet className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-bold text-slate-800 dark:text-white">
+                  {isBangla ? 'শিক্ষক তালিকা সিএসভি ফরম্যাট' : 'Standard Faculty CSV Template'}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  {isBangla 
+                    ? 'নাম, পদবী, বিভাগ, শিক্ষাগত যোগ্যতা ও মোবাইল নম্বরসহ সাজানো টেমপ্লেটটি ডাউনলোড করুন' 
+                    : 'Download the sample CSV template, enter teachers details, and upload.'}
+                </p>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleDownloadTemplate}
+              icon={<Download className="w-3.5 h-3.5 text-emerald-600" />}
+              className="shrink-0"
+            >
+              {isBangla ? 'নমুনা টেমপ্লেট' : 'Download Sample CSV'}
+            </Button>
+          </div>
+
+          {/* Upload Area */}
+          <div className="p-6 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 text-center hover:border-emerald-500 transition-colors">
+            <input
+              id="teacher-csv-file-input"
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleCSVFileChange}
+              className="hidden"
+            />
+            <label
+              htmlFor="teacher-csv-file-input"
+              className="flex flex-col items-center justify-center cursor-pointer group"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-300 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-xs">
+                <UploadCloud className="w-6 h-6" />
+              </div>
+              <p className="font-bold text-sm text-slate-800 dark:text-white mb-0.5">
+                {importFileName ? importFileName : (isBangla ? 'আপনার ডিভাইসের .CSV ফাইল নির্বাচন করুন' : 'Click to select .CSV file')}
+              </p>
+              <p className="text-[11px] text-slate-400">
+                {isBangla ? 'সাপোর্টেড ফরম্যাট: .csv (UTF-8)' : 'Supported format: Comma Separated Values (.csv)'}
+              </p>
+            </label>
+          </div>
+
+          {/* Error Message */}
+          {importError && (
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+              <span>{importError}</span>
+            </div>
+          )}
+
+          {/* Parsed Preview Table */}
+          {importPreview.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <span>
+                    {isBangla 
+                      ? `${importPreview.length} জন শিক্ষকের তথ্য পাওয়া গেছে:` 
+                      : `Found ${importPreview.length} teachers ready to import:`}
+                  </span>
+                </p>
+                <span className="text-[10px] text-slate-400">Showing first {Math.min(5, importPreview.length)} rows</span>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700 max-h-48 overflow-y-auto">
+                <table className="w-full text-[11px] text-left">
+                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold sticky top-0">
+                    <tr>
+                      <th className="py-2 px-3">Name</th>
+                      <th className="py-2 px-3">Designation</th>
+                      <th className="py-2 px-3">Department</th>
+                      <th className="py-2 px-3">Phone</th>
+                      <th className="py-2 px-3">Email</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                    {importPreview.slice(0, 5).map((t, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                        <td className="py-1.5 px-3 font-semibold text-slate-900 dark:text-white">{t.fullName}</td>
+                        <td className="py-1.5 px-3 text-brand-600 dark:text-brand-400 font-medium">{t.designation}</td>
+                        <td className="py-1.5 px-3 text-slate-600 dark:text-slate-300">{t.department}</td>
+                        <td className="py-1.5 px-3 font-mono text-slate-500">{t.phone}</td>
+                        <td className="py-1.5 px-3 text-slate-500 truncate max-w-[140px]">{t.email}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsImportModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              disabled={importPreview.length === 0}
+              onClick={handleConfirmImport}
+              icon={<Upload className="w-3.5 h-3.5" />}
+            >
+              {isBangla ? `${importPreview.length} জন শিক্ষক ইমপোর্ট করুন` : `Import ${importPreview.length} Teachers`}
+            </Button>
+          </div>
+        </div>
       </Modal>
 
     </div>

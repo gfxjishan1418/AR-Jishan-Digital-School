@@ -52,7 +52,8 @@ const AppContent: React.FC = () => {
     
     const isDashboard = params.get('view') === 'dashboard' || hash === 'dashboard';
     const page = params.get('page') || (hash && hash !== 'dashboard' ? hash : 'home');
-    const tab = params.get('tab') || 'dashboard';
+    const rawTab = params.get('tab');
+    const tab = (!rawTab || rawTab === '[object Object]' || rawTab.includes('object')) ? 'students' : rawTab;
 
     return {
       initialView: (isDashboard ? 'dashboard' : 'public') as 'public' | 'dashboard',
@@ -66,6 +67,14 @@ const AppContent: React.FC = () => {
   const [publicPage, setPublicPage] = useState<string>(initialState.initialPage);
   const [dashboardTab, setDashboardTab] = useState<string>(initialState.initialTab);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
+  // Self-heal corrupted URL params if present from old navigation
+  React.useEffect(() => {
+    if (window.location.search.includes('[object') || window.location.search.includes('object%20Object')) {
+      const cleanUrl = window.location.pathname + '?view=dashboard&tab=students';
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }, []);
 
   // Sync URL when navigating public pages
   const handleNavigatePublic = (page: string) => {

@@ -177,7 +177,7 @@ export const ResultsLookup: React.FC = () => {
         <Modal
           isOpen={isPrintModalOpen}
           onClose={() => setIsPrintModalOpen(false)}
-          title="Digital AI School — Verified Academic Transcript"
+          title="AR Jishan Digital School & College — Verified Academic Transcript"
           maxWidth="4xl"
         >
           <PrintableReportCard

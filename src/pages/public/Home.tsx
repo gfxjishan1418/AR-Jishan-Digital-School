@@ -154,11 +154,11 @@ export const Home: React.FC<HomeProps> = ({
                 <div className="absolute -inset-4 bg-gradient-to-r from-brand-500 via-electric-500 to-brand-600 rounded-full blur-2xl opacity-40 group-hover:opacity-70 transition duration-700 animate-pulse" />
                 
                 {/* Logo Frame */}
-                <div className="relative bg-slate-950 p-3 rounded-full border-4 border-brand-500/40 shadow-2xl">
+                <div className="relative bg-white p-4 rounded-3xl border-4 border-brand-500/40 shadow-2xl flex items-center justify-center">
                   <img
                     src="/logo.png"
-                    alt="Digital AI School Logo"
-                    className="w-72 h-72 sm:w-80 sm:h-80 rounded-full object-cover shadow-inner group-hover:scale-102 transition-transform duration-500"
+                    alt="AR Jishan Digital School & College"
+                    className="w-72 h-72 sm:w-80 sm:h-80 rounded-2xl object-contain group-hover:scale-102 transition-transform duration-500"
                   />
                 </div>
               </div>
@@ -193,7 +193,7 @@ export const Home: React.FC<HomeProps> = ({
         </div>
       </section>
 
-      {/* 3. WHY CHOOSE DIGITAL AI SCHOOL */}
+      {/* 3. WHY CHOOSE AR JISHAN DIGITAL SCHOOL & COLLEGE */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">

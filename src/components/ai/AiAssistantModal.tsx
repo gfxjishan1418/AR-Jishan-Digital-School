@@ -15,8 +15,8 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onCl
     {
       role: 'assistant',
       content: isBangla 
-        ? 'আসসালামু আলাইকুম! আমি ডিজিটাল এআই স্কুলের নোভা এআই সহকারী। পাঠ পরিকল্পনা তৈরি, পরীক্ষার প্রশ্ন প্রণয়ন, সিলেবাসের জটিল বিষয় সহজভাবে বোঝা অথবা স্কুল প্রশাসনের তথ্য জানতে আমাকে প্রশ্ন করতে পারেন।'
-        : "Hello! I'm Nova AI, your Digital AI School Assistant. How can I help you today? I can explain lessons, help draft NCTB curriculum lesson plans, prepare quizzes, or analyze school operational statistics.",
+        ? 'আসসালামু আলাইকুম! আমি এআর জিশান ডিজিটাল স্কুল অ্যান্ড কলেজের নোভা এআই সহকারী। পাঠ পরিকল্পনা তৈরি, পরীক্ষার প্রশ্ন প্রণয়ন, সিলেবাসের জটিল বিষয় সহজভাবে বোঝা অথবা স্কুল প্রশাসনের তথ্য জানতে আমাকে প্রশ্ন করতে পারেন।'
+        : "Hello! I'm Nova AI, your AR Jishan Digital School & College Assistant. How can I help you today? I can explain lessons, help draft NCTB curriculum lesson plans, prepare quizzes, or analyze school operational statistics.",
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -100,7 +100,7 @@ export const AiAssistantModal: React.FC<AiAssistantModalProps> = ({ isOpen, onCl
                   {AIService.isConfigured() ? 'Gemini Live' : 'Education Engine'}
                 </span>
               </div>
-              <p className="text-xs text-brand-100/80">Digital AI School • Smart Education Intelligence</p>
+              <p className="text-xs text-brand-100/80">AR Jishan Digital School & College • Smart Education Intelligence</p>
             </div>
           </div>
 

@@ -16,7 +16,7 @@ export const Login: React.FC<LoginProps> = ({ onSuccessLogin, onNavigateHome }) 
   const { login, switchRole, demoProfiles } = useAuth();
   const { t } = useLanguage();
 
-  const [email, setEmail] = useState('ria.admin@digitalaischool.edu.bd');
+  const [email, setEmail] = useState('ria.admin@arjishandigitalschool.edu.bd');
   const [password, setPassword] = useState('Password123!');
   const [selectedRole, setSelectedRole] = useState<UserRole>('school_admin');
   const [isLoading, setIsLoading] = useState(false);
@@ -58,12 +58,12 @@ export const Login: React.FC<LoginProps> = ({ onSuccessLogin, onNavigateHome }) 
           >
             <img
               src="/logo.png"
-              alt="Digital AI School"
-              className="w-16 h-16 rounded-full object-cover ring-2 ring-brand-500/50 group-hover:scale-105 transition-transform"
+              alt="AR Jishan Digital School & College"
+              className="w-16 h-16 rounded-2xl object-contain bg-white p-1 ring-2 ring-brand-500/50 group-hover:scale-105 transition-transform shadow-md"
             />
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            Digital AI School Portal
+            AR Jishan Digital School & College
           </h2>
           <p className="text-xs text-slate-500">
             Secure Role-Based Access for Students, Parents, Faculty & Administration

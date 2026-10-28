@@ -15,14 +15,14 @@ export const Footer: React.FC<{ onNavigate: (page: string) => void }> = ({ onNav
             <div className="flex items-center gap-3">
               <img
                 src="/logo.png"
-                alt="Digital AI School"
-                className="w-12 h-12 rounded-full object-cover ring-2 ring-brand-500/50"
+                alt="AR Jishan Digital School & College"
+                className="w-12 h-12 rounded-xl object-contain bg-white p-0.5 ring-2 ring-brand-500/50"
               />
               <div>
                 <span className="font-extrabold text-xl text-white tracking-tight">
-                  Digital AI School
+                  {t.brandName}
                 </span>
-                <p className="text-xs text-brand-400 font-medium">Smart Education. Simple Management.</p>
+                <p className="text-xs text-brand-400 font-medium">{t.tagline}</p>
               </div>
             </div>
 
@@ -82,7 +82,7 @@ export const Footer: React.FC<{ onNavigate: (page: string) => void }> = ({ onNav
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-brand-400 shrink-0" />
-                <span>admissions@digitalaischool.edu.bd</span>
+                <span>info@arjishandigitalschool.edu.bd</span>
               </li>
             </ul>
 
@@ -101,7 +101,7 @@ export const Footer: React.FC<{ onNavigate: (page: string) => void }> = ({ onNav
 
         {/* Bottom copyright */}
         <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© 2026 Digital AI School ERP. All Rights Reserved. Built for Smart Bangladesh 2041.</p>
+          <p>© 2026 AR Jishan Digital School & College. All Rights Reserved. Built for Smart Bangladesh 2041.</p>
           <div className="flex items-center gap-4">
             <button onClick={() => onNavigate('privacy')} className="hover:text-slate-400">Terms of Service</button>
             <button onClick={() => onNavigate('privacy')} className="hover:text-slate-400">Privacy Policy</button>

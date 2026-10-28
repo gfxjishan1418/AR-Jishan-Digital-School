@@ -335,7 +335,7 @@ export const FeeManagement: React.FC = () => {
         <Modal
           isOpen={isReceiptModalOpen}
           onClose={() => setIsReceiptModalOpen(false)}
-          title="Digital AI School — Official Payment Receipt"
+          title="AR Jishan Digital School & College — Official Payment Receipt"
           maxWidth="2xl"
         >
           <PrintableReceipt invoice={selectedInvoice} school={school} />

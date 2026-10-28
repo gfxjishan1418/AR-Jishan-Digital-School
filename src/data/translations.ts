@@ -3,9 +3,9 @@ export type Language = 'en' | 'bn';
 export const translations = {
   en: {
     // Brand
-    brandName: 'Digital AI School',
-    tagline: 'Smart Education. Simple Management. Better Learning.',
-    subTagline: 'Bangladesh’s Premier AI-Powered School Management SaaS Platform',
+    brandName: 'AR Jishan Digital School & College',
+    tagline: 'Learn • Grow • Build Your Future',
+    subTagline: 'Premier AI-Powered Digital School & College Management Platform',
     
     // Navigation
     nav: {
@@ -48,7 +48,7 @@ export const translations = {
       statsTeachers: 'Qualified Educators',
       statsPassRate: 'Board Exam Pass Rate',
       statsAcheivements: 'National Awards',
-      whyChooseTitle: 'Why Leading Institutions Choose Digital AI School',
+      whyChooseTitle: 'Why Leading Students Choose AR Jishan Digital School & College',
       whyChooseSubtitle: 'Engineered specifically for the Bangladeshi education curriculum and administrative workflow.',
       aiBannerTitle: 'Built-in Nova AI Learning & Administration Assistant',
       aiBannerDesc: 'Automate lesson plan creation in seconds, predict fee defaulter risks before they happen, and provide 24/7 bilingual AI tutoring for your students.',
@@ -181,9 +181,9 @@ export const translations = {
 
   bn: {
     // Brand
-    brandName: 'ডিজিটাল এআই স্কুল',
-    tagline: 'স্মার্ট শিক্ষা। সহজ পরিচালনা। উন্নত শিখন।',
-    subTagline: 'বাংলাদেশের শীর্ষস্থানীয় এআই-চালিত স্কুল ম্যানেজমেন্ট প্ল্যাটফর্ম',
+    brandName: 'এআর জিশান ডিজিটাল স্কুল অ্যান্ড কলেজ',
+    tagline: 'শিখুন • বিকশিত হোন • গড়ুন আপনার ভবিষ্যৎ',
+    subTagline: 'আধুনিক এআই-চালিত ডিজিটাল স্কুল অ্যান্ড কলেজ ম্যানেজমেন্ট প্ল্যাটফর্ম',
     
     // Navigation
     nav: {
@@ -226,7 +226,7 @@ export const translations = {
       statsTeachers: 'অভিজ্ঞ শিক্ষক',
       statsPassRate: 'বোর্ড পাশের হার',
       statsAcheivements: 'জাতীয় পুরস্কার',
-      whyChooseTitle: 'কেন ডিজিটাল এআই স্কুল সেরা?',
+      whyChooseTitle: 'কেন এআর জিশান ডিজিটাল স্কুল অ্যান্ড কলেজ সেরা?',
       whyChooseSubtitle: 'বাংলাদেশ জাতীয় শিক্ষাক্রম ও আধুনিক শিক্ষাদানের সাথে সামঞ্জস্য রেখে তৈরি।',
       aiBannerTitle: 'ইন-বিল্ট নোভা এআই সহকারী ও লার্নিং প্ল্যাটফর্ম',
       aiBannerDesc: 'মুহূর্তের মধ্যে লেসন প্ল্যান তৈরি করুন, ফি খেলাপি ঝুঁকি আগেই জানুন এবং শিক্ষার্থীদের ২৪/৭ দ্বিভাষিক এআই শিক্ষাদান সেবা দিন।',

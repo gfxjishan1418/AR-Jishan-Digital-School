@@ -38,7 +38,7 @@ export const PrincipalMessage: React.FC = () => {
             Dear Parents, Guardians, and Esteemed Students,
           </p>
           <p>
-            It is my distinct privilege to welcome you to <strong>{school.name}</strong>. In an era redefined by rapid technological breakthroughs and global transformation, education cannot remain confined to rote memorization. At Digital AI School, we have harmonized the rich values and rigor of the Bangladesh National Curriculum with the unprecedented potential of Artificial Intelligence.
+            It is my distinct privilege to welcome you to <strong>{school.name}</strong>. In an era redefined by rapid technological breakthroughs and global transformation, education cannot remain confined to rote memorization. At AR Jishan Digital School & College, we have harmonized the rich values and rigor of the Bangladesh National Curriculum with the unprecedented potential of modern digital education and Artificial Intelligence.
           </p>
           <p>
             Our students do not just study science and literature; they engage with AI-driven diagnostic tutors, formulate original hypotheses in state-of-the-art laboratories, and learn ethical civic responsibility. We believe every child possesses innate genius that blooms when provided with empathy, structure, and world-class instructional tools.
@@ -48,7 +48,7 @@ export const PrincipalMessage: React.FC = () => {
           </p>
           <div className="pt-4 font-serif text-slate-900 dark:text-white font-bold">
             <p>Ms. Ria Sultana</p>
-            <p className="text-xs font-sans text-slate-500 font-normal">Principal, Digital AI School & College</p>
+            <p className="text-xs font-sans text-slate-500 font-normal">Principal, AR Jishan Digital School & College</p>
           </div>
         </div>
       </Card>

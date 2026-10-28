@@ -5,16 +5,16 @@ import {
 } from '../types';
 
 export const INITIAL_SCHOOL: School = {
-  id: 'school_dhaka_01',
-  name: 'Digital AI International Model School & College',
-  code: 'DAI-DHK-2026',
-  subdomain: 'dhaka-model',
+  id: 'school_ar_jishan_01',
+  name: 'AR Jishan Digital School & College',
+  code: 'ARJ-DHK-2026',
+  subdomain: 'ar-jishan',
   address: 'House 42, Road 9/A, Dhanmondi R/A, Dhaka-1209',
   city: 'Dhaka',
   eiinNumber: '134892',
   board: 'Dhaka Education Board',
   phone: '+880 1711-234567',
-  email: 'admin@digitalaischool.edu.bd',
+  email: 'info@arjishandigitalschool.edu.bd',
   currency: 'BDT',
   currencySymbol: '৳',
   logo: '/logo.png',

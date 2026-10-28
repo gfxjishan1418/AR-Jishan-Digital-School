@@ -56,19 +56,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center gap-3">
           <img 
             src="/logo.png" 
-            alt="Digital AI School" 
-            className="w-10 h-10 rounded-full object-cover shadow-sm ring-2 ring-brand-500/30" 
+            alt="AR Jishan Digital School & College" 
+            className="w-11 h-11 rounded-xl object-contain bg-white shadow-sm ring-2 ring-brand-500/30 p-0.5 shrink-0" 
           />
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white">
-                Digital AI School
+              <span className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white truncate">
+                AR Jishan
               </span>
               <span className="text-[10px] px-1.5 py-0.5 rounded-sm font-bold bg-brand-100 text-brand-800 dark:bg-brand-900/60 dark:text-brand-300">
                 ERP
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 font-medium">Smart Education Management</p>
+            <p className="text-[10px] text-slate-400 font-medium truncate">Digital School & College</p>
           </div>
         </div>
 
@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div className="px-4 py-2.5">
         <div className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-emerald-600 text-white shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-xs font-bold leading-tight">Digital AI School ERP</p>
+            <p className="text-xs font-bold leading-tight truncate">AR Jishan School & College</p>
             <p className="text-[11px] text-brand-100 font-medium">Session 2026 • Term 1</p>
           </div>
           <span className="w-2 h-2 rounded-full bg-emerald-300 animate-ping" />

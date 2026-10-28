@@ -58,18 +58,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <img
               src="/logo.png"
-              alt="Digital AI School"
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-brand-500/40 group-hover:scale-105 transition-transform"
+              alt="AR Jishan Digital School & College"
+              className="w-12 h-12 rounded-xl object-contain bg-white ring-2 ring-brand-500/40 group-hover:scale-105 transition-transform p-0.5 shadow-sm"
             />
             <div>
-              <span className="font-extrabold text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
-                Digital AI School
-                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-sm font-black bg-brand-600 text-white tracking-widest">
-                  DAI
-                </span>
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                {t.brandName}
               </span>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
-                Smart Education. Simple Management.
+                {t.tagline}
               </p>
             </div>
           </div>

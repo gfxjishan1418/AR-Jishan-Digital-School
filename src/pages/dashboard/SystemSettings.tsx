@@ -74,7 +74,7 @@ export const SystemSettings: React.FC = () => {
                 Multi-Tenant Architecture Active
               </p>
               <h3 className="font-extrabold text-base text-white">{school.name}</h3>
-              <p className="text-xs text-slate-400">Tenant Code: {school.code} • Subdomain: {school.subdomain}.digitalaischool.edu.bd</p>
+              <p className="text-xs text-slate-400">Tenant Code: {school.code} • Subdomain: {school.subdomain}.arjishandigitalschool.edu.bd</p>
             </div>
           </div>
 

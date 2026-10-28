@@ -46,7 +46,15 @@ function setLocal<T>(key: string, value: T): void {
 }
 
 export const StorageService = {
-  getSchool: (): School => getLocal(KEYS.SCHOOL, INITIAL_SCHOOL),
+  getSchool: (): School => {
+    const s = getLocal(KEYS.SCHOOL, INITIAL_SCHOOL);
+    if (!s || s.name.includes('Digital AI International') || s.name === 'Digital AI School') {
+      s.name = 'AR Jishan Digital School & College';
+      s.logo = '/logo.png';
+      setLocal(KEYS.SCHOOL, s);
+    }
+    return s;
+  },
   setSchool: (school: School) => setLocal(KEYS.SCHOOL, school),
 
   getStudents: (): Student[] => getLocal(KEYS.STUDENTS, INITIAL_STUDENTS),

@@ -13,7 +13,7 @@ export const PrivacyTerms: React.FC = () => {
           Privacy Policy & Terms of Service
         </h1>
         <p className="text-xs text-slate-500">
-          Last revised: May 2026 • Digital AI School Multi-Tenant Security Standard
+          Last revised: May 2026 • AR Jishan Digital School & College Multi-Tenant Security Standard
         </p>
       </div>
 
@@ -25,7 +25,7 @@ export const PrivacyTerms: React.FC = () => {
             1. Student Data Privacy & Isolation
           </h2>
           <p>
-            Digital AI School strictly enforces PostgreSQL Row Level Security (RLS) across all multi-tenant structures. Student educational records, attendance logs, and marks cannot be enumerated or accessed across different schools or unauthorized user accounts. Parents can only access records strictly linked to their verified ward.
+            AR Jishan Digital School & College strictly enforces PostgreSQL Row Level Security (RLS) across all multi-tenant structures. Student educational records, attendance logs, and marks cannot be enumerated or accessed across different schools or unauthorized user accounts. Parents can only access records strictly linked to their verified ward.
           </p>
         </div>
 

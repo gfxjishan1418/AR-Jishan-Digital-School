@@ -1,0 +1,528 @@
+import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
+import { StorageService } from '../../lib/storage';
+import { Student } from '../../types';
+import { Card } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
+import { Button } from '../../components/ui/Button';
+import { Modal } from '../../components/ui/Modal';
+import { 
+  Search, Plus, Download, Upload, Filter, Edit, 
+  Trash2, Eye, UserCheck, Phone, Mail, MapPin, Printer 
+} from 'lucide-react';
+
+export const StudentsList: React.FC = () => {
+  const { t, isBangla } = useLanguage();
+  const [students, setStudents] = useState<Student[]>(() => StorageService.getStudents());
+  const [search, setSearch] = useState('');
+  const [selectedClass, setSelectedClass] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  
+  // Modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [activeStudent, setActiveStudent] = useState<Student | null>(null);
+
+  // Form State for Add / Edit
+  const [formData, setFormData] = useState<Partial<Student>>({
+    fullName: '',
+    banglaName: '',
+    rollNo: 1,
+    className: 'Class 10',
+    sectionName: 'Section A (Padma)',
+    gender: 'Male',
+    dateOfBirth: '2010-01-01',
+    bloodGroup: 'A+',
+    religion: 'Islam',
+    guardianName: '',
+    guardianPhone: '',
+    guardianRelation: 'Father',
+    address: 'Dhanmondi, Dhaka',
+    status: 'Active',
+    feeStatus: 'Paid',
+    attendanceRate: 95,
+  });
+
+  const filteredStudents = students.filter(s => {
+    const matchSearch = 
+      s.fullName.toLowerCase().includes(search.toLowerCase()) ||
+      (s.banglaName && s.banglaName.includes(search)) ||
+      s.admissionNo.toLowerCase().includes(search.toLowerCase()) ||
+      s.rollNo.toString().includes(search);
+    const matchClass = selectedClass === 'all' || s.className === selectedClass;
+    const matchStatus = selectedStatus === 'all' || s.status === selectedStatus;
+    return matchSearch && matchClass && matchStatus;
+  });
+
+  const handleSaveStudent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullName || !formData.guardianPhone) {
+      alert('Please fill in Student Name and Guardian Phone');
+      return;
+    }
+
+    if (activeStudent) {
+      // Edit
+      const updatedStudent: Student = {
+        ...activeStudent,
+        ...formData as Student,
+      };
+      const list = StorageService.updateStudent(updatedStudent);
+      setStudents(list);
+    } else {
+      // Create new
+      const newStudent: Student = {
+        id: `stu-${Date.now()}`,
+        admissionNo: `ADM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        rollNo: Number(formData.rollNo) || 10,
+        fullName: formData.fullName || '',
+        banglaName: formData.banglaName,
+        gender: formData.gender as any || 'Male',
+        dateOfBirth: formData.dateOfBirth || '2010-01-01',
+        bloodGroup: formData.bloodGroup || 'O+',
+        religion: formData.religion || 'Islam',
+        classId: 'c10',
+        className: formData.className || 'Class 10',
+        sectionId: 's10a',
+        sectionName: formData.sectionName || 'Section A (Padma)',
+        guardianName: formData.guardianName || '',
+        guardianPhone: formData.guardianPhone || '',
+        guardianRelation: formData.guardianRelation || 'Father',
+        address: formData.address || 'Dhaka',
+        photoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+        status: 'Active',
+        feeStatus: 'Paid',
+        attendanceRate: 95,
+        enrolledDate: new Date().toISOString().split('T')[0],
+      };
+      const list = StorageService.addStudent(newStudent);
+      setStudents(list);
+    }
+
+    setIsAddModalOpen(false);
+    setActiveStudent(null);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to remove this student record?')) {
+      const list = StorageService.deleteStudent(id);
+      setStudents(list);
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Admission No', 'Roll', 'Name', 'Class', 'Section', 'Guardian', 'Phone', 'Status', 'Fee Status'];
+    const rows = filteredStudents.map(s => [
+      s.admissionNo,
+      s.rollNo,
+      `"${s.fullName}"`,
+      s.className,
+      s.sectionName,
+      `"${s.guardianName}"`,
+      s.guardianPhone,
+      s.status,
+      s.feeStatus
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Students_List_DAI_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="space-y-6">
+      
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            {t.modules.students} — SIS Roster
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Total Enrolled: {students.length} students across all active batches
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExportCSV}
+            icon={<Download className="w-3.5 h-3.5" />}
+          >
+            {t.common.exportCSV}
+          </Button>
+
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={() => {
+              setActiveStudent(null);
+              setFormData({
+                fullName: '',
+                banglaName: '',
+                rollNo: students.length + 1,
+                className: 'Class 10',
+                sectionName: 'Section A (Padma)',
+                gender: 'Male',
+                bloodGroup: 'A+',
+                guardianRelation: 'Father',
+                status: 'Active',
+                feeStatus: 'Paid',
+              });
+              setIsAddModalOpen(true);
+            }}
+            icon={<Plus className="w-3.5 h-3.5" />}
+          >
+            {t.actions.addStudent}
+          </Button>
+        </div>
+      </div>
+
+      {/* Search and Filters Bar */}
+      <Card className="p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          
+          <div className="sm:col-span-2 relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by student name, roll, or admission ID..."
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+
+          <div>
+            <select
+              value={selectedClass}
+              onChange={(e) => setSelectedClass(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="all">All Classes</option>
+              <option value="Class 10">Class 10</option>
+              <option value="Class 9">Class 9</option>
+              <option value="Class 8">Class 8</option>
+              <option value="Class 7">Class 7</option>
+              <option value="Class 6">Class 6</option>
+            </select>
+          </div>
+
+          <div>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500"
+            >
+              <option value="all">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Suspended">Suspended</option>
+              <option value="Transferred">Transferred</option>
+            </select>
+          </div>
+
+        </div>
+      </Card>
+
+      {/* Students Data Table */}
+      <Card className="p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-500 uppercase font-semibold border-b border-slate-200 dark:border-slate-800">
+              <tr>
+                <th className="py-3 px-4">Roll</th>
+                <th className="py-3 px-4">Student</th>
+                <th className="py-3 px-4">Admission ID</th>
+                <th className="py-3 px-4">Class & Section</th>
+                <th className="py-3 px-4">Guardian Contact</th>
+                <th className="py-3 px-4 text-center">Attendance</th>
+                <th className="py-3 px-4">Fee Status</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="py-8 text-center text-slate-400">
+                    {t.common.noData}
+                  </td>
+                </tr>
+              ) : (
+                filteredStudents.map((stu) => (
+                  <tr key={stu.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                    
+                    <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">
+                      #{stu.rollNo}
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <img
+                          src={stu.photoUrl}
+                          alt={stu.fullName}
+                          className="w-8 h-8 rounded-full object-cover ring-1 ring-brand-500/30"
+                        />
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-white">{stu.fullName}</p>
+                          {stu.banglaName && (
+                            <p className="font-bangla text-[11px] text-slate-500">{stu.banglaName}</p>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3 px-4 font-mono text-slate-600 dark:text-slate-400">
+                      {stu.admissionNo}
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <p className="font-semibold text-slate-900 dark:text-white">{stu.className}</p>
+                      <p className="text-[10px] text-slate-500">{stu.sectionName}</p>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <p className="text-slate-900 dark:text-white font-medium">{stu.guardianName}</p>
+                      <p className="text-[10px] text-slate-500 font-mono">{stu.guardianPhone}</p>
+                    </td>
+
+                    <td className="py-3 px-4 text-center">
+                      <span className="font-bold text-emerald-600">{stu.attendanceRate}%</span>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <Badge 
+                        variant={stu.feeStatus === 'Paid' ? 'emerald' : stu.feeStatus === 'Pending' ? 'amber' : 'rose'}
+                        size="sm"
+                      >
+                        {stu.feeStatus}
+                      </Badge>
+                    </td>
+
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => {
+                            setActiveStudent(stu);
+                            setIsViewModalOpen(true);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                          title="View Profile"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveStudent(stu);
+                            setFormData(stu);
+                            setIsAddModalOpen(true);
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                          title="Edit Student"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(stu.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                          title="Delete Student"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      {/* Add / Edit Student Modal */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title={activeStudent ? 'Edit Student Details' : 'Register New Student (Admission)'}
+        maxWidth="2xl"
+      >
+        <form onSubmit={handleSaveStudent} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block font-semibold mb-1">Full Name (English) *</label>
+              <input
+                type="text"
+                required
+                value={formData.fullName || ''}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                placeholder="e.g. Tanvir Ahmed"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">বাংলা নাম (Bangla Name)</label>
+              <input
+                type="text"
+                value={formData.banglaName || ''}
+                onChange={(e) => setFormData({ ...formData, banglaName: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bangla"
+                placeholder="যেমন: তানভীর আহমেদ"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Class</label>
+              <select
+                value={formData.className || 'Class 10'}
+                onChange={(e) => setFormData({ ...formData, className: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              >
+                <option value="Class 10">Class 10</option>
+                <option value="Class 9">Class 9</option>
+                <option value="Class 8">Class 8</option>
+                <option value="Class 7">Class 7</option>
+                <option value="Class 6">Class 6</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Section</label>
+              <input
+                type="text"
+                value={formData.sectionName || 'Section A (Padma)'}
+                onChange={(e) => setFormData({ ...formData, sectionName: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Roll Number</label>
+              <input
+                type="number"
+                value={formData.rollNo || 1}
+                onChange={(e) => setFormData({ ...formData, rollNo: Number(e.target.value) })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Blood Group</label>
+              <select
+                value={formData.bloodGroup || 'A+'}
+                onChange={(e) => setFormData({ ...formData, bloodGroup: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+              >
+                <option value="A+">A+</option>
+                <option value="B+">B+</option>
+                <option value="O+">O+</option>
+                <option value="AB+">AB+</option>
+                <option value="A-">A-</option>
+                <option value="B-">B-</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Guardian Name *</label>
+              <input
+                type="text"
+                required
+                value={formData.guardianName || ''}
+                onChange={(e) => setFormData({ ...formData, guardianName: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                placeholder="e.g. Belal Hossain"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-1">Guardian Phone *</label>
+              <input
+                type="text"
+                required
+                value={formData.guardianPhone || ''}
+                onChange={(e) => setFormData({ ...formData, guardianPhone: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+                placeholder="+880 1711-XXXXXX"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-1">Residential Address</label>
+            <textarea
+              rows={2}
+              value={formData.address || ''}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <Button type="button" variant="ghost" onClick={() => setIsAddModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              Save Student Record
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* View Full Student Profile Modal */}
+      {activeStudent && (
+        <Modal
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          title="Student Profile & Academic Record"
+          maxWidth="xl"
+        >
+          <div className="space-y-6 text-xs">
+            <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <img
+                src={activeStudent.photoUrl}
+                alt={activeStudent.fullName}
+                className="w-16 h-16 rounded-2xl object-cover ring-2 ring-brand-500"
+              />
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{activeStudent.fullName}</h3>
+                  <Badge variant="emerald">{activeStudent.status}</Badge>
+                </div>
+                {activeStudent.banglaName && (
+                  <p className="font-bangla text-slate-500 text-xs">{activeStudent.banglaName}</p>
+                )}
+                <p className="text-slate-500 mt-1">
+                  ID: <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{activeStudent.admissionNo}</span> • Roll: <strong>{activeStudent.rollNo}</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                <p className="font-bold text-slate-400 uppercase text-[10px]">Academic Details</p>
+                <p><span className="text-slate-500">Class:</span> <strong>{activeStudent.className}</strong></p>
+                <p><span className="text-slate-500">Section:</span> <strong>{activeStudent.sectionName}</strong></p>
+                <p><span className="text-slate-500">Attendance:</span> <strong className="text-emerald-600">{activeStudent.attendanceRate}%</strong></p>
+                <p><span className="text-slate-500">Fee Status:</span> <strong>{activeStudent.feeStatus}</strong></p>
+              </div>
+
+              <div className="space-y-2 p-3 rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                <p className="font-bold text-slate-400 uppercase text-[10px]">Guardian & Contact</p>
+                <p><span className="text-slate-500">Guardian:</span> <strong>{activeStudent.guardianName} ({activeStudent.guardianRelation})</strong></p>
+                <p><span className="text-slate-500">Phone:</span> <strong>{activeStudent.guardianPhone}</strong></p>
+                <p><span className="text-slate-500">Blood Group:</span> <strong>{activeStudent.bloodGroup}</strong></p>
+                <p><span className="text-slate-500">Address:</span> <span>{activeStudent.address}</span></p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button size="sm" variant="secondary" onClick={() => setIsViewModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+    </div>
+  );
+};

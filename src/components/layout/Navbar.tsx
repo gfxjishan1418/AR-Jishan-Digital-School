@@ -54,30 +54,30 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Logo & Brand */}
           <div 
             onClick={() => onNavigate('home')} 
-            className="flex items-center gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0 mr-2 lg:mr-4"
           >
             <img
               src="/logo.png"
               alt="AR Jishan Digital School & College"
-              className="w-12 h-12 rounded-xl object-contain bg-white ring-2 ring-brand-500/40 group-hover:scale-105 transition-transform p-0.5 shadow-sm"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-contain bg-white ring-2 ring-brand-500/40 group-hover:scale-105 transition-transform p-0.5 shadow-sm shrink-0"
             />
-            <div>
-              <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            <div className="flex flex-col min-w-0">
+              <span className="font-extrabold text-sm sm:text-base lg:text-lg tracking-tight text-slate-900 dark:text-white whitespace-nowrap leading-tight">
                 {t.brandName}
               </span>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap hidden md:block">
                 {t.tagline}
               </p>
             </div>
           </div>
 
           {/* Desktop Nav Links */}
-          <div className="hidden xl:flex items-center gap-1">
+          <div className="hidden xl:flex items-center gap-0.5 2xl:gap-1">
             {navLinks.map((link) => (
               <button
                 key={link.id}
                 onClick={() => onNavigate(link.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`px-2.5 2xl:px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
                   currentPublicPage === link.id
                     ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100/60 dark:hover:bg-slate-800/60'
@@ -89,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Action CTAs */}
-          <div className="hidden sm:flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-2 shrink-0">
             <LanguageToggle />
 
             <button

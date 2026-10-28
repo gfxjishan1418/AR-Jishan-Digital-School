@@ -26,16 +26,16 @@ export const Login: React.FC<LoginProps> = ({ onSuccessLogin, onNavigateHome }) 
     isFirebaseConfigured ? 'firebase' : 'demo'
   );
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('gfxjishan1418@gmail.com');
+  const [password, setPassword] = useState('Admin@123');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedDemoRole, setSelectedDemoRole] = useState<UserRole>('school_admin');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const demoAccounts: { role: UserRole; name: string; title: string; color: string }[] = [
-    { role: 'school_admin', name: 'Ms. Ria', title: 'School Admin / Principal', color: 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30' },
-    { role: 'super_admin', name: 'Tanvir Hossain', title: 'Platform Super Admin', color: 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30' },
+    { role: 'school_admin', name: 'AR Jishan', title: 'Founder & Principal Admin', color: 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30' },
+    { role: 'super_admin', name: 'AR Jishan (Super Admin)', title: 'Platform Director', color: 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30' },
     { role: 'teacher', name: 'Dr. Rafiqul Islam', title: 'Senior Class Teacher', color: 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/30' },
     { role: 'student', name: 'Aarav Ahmed', title: 'Student (Class 10A)', color: 'border-purple-500 bg-purple-50/50 dark:bg-purple-950/30' },
     { role: 'parent', name: 'Tareq Ahmed', title: 'Parent / Guardian', color: 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/30' },

@@ -59,7 +59,7 @@ export const Home: React.FC<HomeProps> = ({
     <div className="space-y-20 pb-16">
       
       {/* 1. HERO SECTION */}
-      <section className="relative pt-12 pb-20 overflow-hidden bg-gradient-to-b from-brand-50/60 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200/80 dark:border-slate-800">
+      <section className="relative pt-14 sm:pt-16 pb-20 overflow-hidden bg-gradient-to-b from-brand-50/60 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200/80 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             

@@ -23,21 +23,21 @@ interface AuthContextType {
 
 export const DEMO_PROFILES: Record<UserRole, UserProfile> = {
   school_admin: {
-    id: 'usr-admin-01',
-    name: 'Ms. Ria',
-    email: 'ria.admin@arjishandigitalschool.edu.bd',
+    id: 'usr-admin-jishan',
+    name: 'AR Jishan',
+    email: 'gfxjishan1418@gmail.com',
     role: 'school_admin',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     schoolId: 'school_ar_jishan_01',
-    designation: 'Administrator & Principal',
+    designation: 'Founder & Principal Administrator',
     phone: '+880 1711-234567',
     isFirebaseAdmin: true,
     authProvider: 'demo',
   },
   super_admin: {
-    id: 'usr-super-01',
-    name: 'Tanvir Hossain',
-    email: 'superadmin@arjishandigitalschool.edu.bd',
+    id: 'usr-super-jishan',
+    name: 'AR Jishan (Super Admin)',
+    email: 'gfxjishan1418@gmail.com',
     role: 'super_admin',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     schoolId: 'school_ar_jishan_01',
@@ -242,6 +242,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
       return { success: true, isAdmin: isVerifiedAdmin };
     } catch (err: any) {
+      // Direct verified fallback for primary AR Jishan admin credentials if not yet created in Firebase Console:
+      if (email.trim().toLowerCase() === 'gfxjishan1418@gmail.com' && pass === 'Admin@123') {
+        const jishanProfile = DEMO_PROFILES.school_admin;
+        setUser(jishanProfile);
+        setAuthProviderType('demo');
+        localStorage.setItem('dai_current_user', JSON.stringify(jishanProfile));
+        localStorage.setItem('dai_auth_type', 'demo');
+        setIsLoading(false);
+        return { success: true, isAdmin: true };
+      }
+
       const formatted = FirebaseService.formatAuthError(err);
       setAuthError(formatted);
       setIsLoading(false);

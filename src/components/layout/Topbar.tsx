@@ -187,14 +187,15 @@ export const Topbar: React.FC<TopbarProps> = ({
                 </div>
                 <div className="py-1">
                   <button
-                    onClick={() => {
-                      logout();
+                    onClick={async () => {
                       setShowUserDropdown(false);
+                      await logout();
+                      onNavigateHome();
                     }}
-                    className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2 cursor-pointer transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
-                    <span>Sign Out</span>
+                    <span>Sign Out & Lock Session</span>
                   </button>
                 </div>
               </div>

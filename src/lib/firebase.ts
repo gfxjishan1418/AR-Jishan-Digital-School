@@ -5,7 +5,9 @@ import {
   createUserWithEmailAndPassword, 
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User as FirebaseUser
+  getIdTokenResult,
+  User as FirebaseUser,
+  IdTokenResult
 } from 'firebase/auth';
 import { 
   getFirestore, 
@@ -171,5 +173,61 @@ export const FirebaseService = {
 
   logout: async () => {
     if (auth) await firebaseSignOut(auth);
+  },
+
+  /**
+   * Verify Custom Claims directly from the cryptographically signed Firebase ID token.
+   * This is a trusted server-signed check: client cannot forge token claims.
+   */
+  verifyUserAdminClaims: async (user: FirebaseUser, forceRefresh = true): Promise<{
+    isAdmin: boolean;
+    role: string;
+    claims: Record<string, any>;
+  }> => {
+    if (!user) {
+      return { isAdmin: false, role: 'none', claims: {} };
+    }
+    const tokenResult: IdTokenResult = await getIdTokenResult(user, forceRefresh);
+    const claims = tokenResult.claims || {};
+    
+    // Check if user has admin claim or admin role
+    const hasAdminClaim = Boolean(
+      claims.admin === true || 
+      claims.role === 'school_admin' || 
+      claims.role === 'super_admin' ||
+      claims.role === 'admin'
+    );
+
+    const resolvedRole = (claims.role as string) || (hasAdminClaim ? 'school_admin' : 'viewer');
+
+    return {
+      isAdmin: hasAdminClaim,
+      role: resolvedRole,
+      claims,
+    };
+  },
+
+  /**
+   * Map Firebase Auth error codes to user-friendly messages
+   */
+  formatAuthError: (err: any): string => {
+    const code = err?.code || '';
+    switch (code) {
+      case 'auth/invalid-credential':
+      case 'auth/wrong-password':
+        return 'Incorrect email address or password. Please check your credentials and try again.';
+      case 'auth/user-not-found':
+        return 'No user found with this email address. Please contact the school administrator.';
+      case 'auth/too-many-requests':
+        return 'Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or try again later.';
+      case 'auth/user-disabled':
+        return 'This account has been disabled by the institution. Please contact the administrator.';
+      case 'auth/invalid-email':
+        return 'Please enter a valid email address.';
+      case 'auth/network-request-failed':
+        return 'Network connection error. Please check your internet connection.';
+      default:
+        return err?.message || 'Authentication failed. Please verify your credentials.';
+    }
   }
 };

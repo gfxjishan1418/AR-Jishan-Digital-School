@@ -23,7 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-# Environment Variables
+# Environment Variables & Secret Keys
 .env
 .env*.local
 !.env.example
+*serviceAccount*.json
+serviceAccountKey*.json
+*.pem
+*.key

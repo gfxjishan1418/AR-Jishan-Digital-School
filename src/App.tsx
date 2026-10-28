@@ -41,6 +41,7 @@ import { SystemSettings } from './pages/dashboard/SystemSettings';
 import { AuditSecurity } from './pages/dashboard/AuditSecurity';
 import { StudentPortal } from './pages/dashboard/StudentPortal';
 import { ParentPortal } from './pages/dashboard/ParentPortal';
+import { AdminRoute } from './components/auth/AdminRoute';
 
 const AppContent: React.FC = () => {
   const { role } = useAuth();
@@ -163,50 +164,55 @@ const AppContent: React.FC = () => {
     );
   }
 
-  // Render ERP SaaS Dashboard
+  // Render ERP SaaS Dashboard (Protected by AdminRoute)
   return (
-    <DashboardLayout
-      currentTab={dashboardTab}
-      onSelectTab={handleSelectDashboardTab}
-      onNavigateHome={() => handleNavigatePublic('home')}
+    <AdminRoute
+      onRedirectLogin={() => handleNavigatePublic('login')}
+      onRedirectHome={() => handleNavigatePublic('home')}
     >
-      {dashboardTab === 'dashboard' && (
-        role === 'student' ? (
-          <StudentPortal onOpenAiChat={() => setIsAiModalOpen(true)} />
-        ) : role === 'parent' ? (
-          <ParentPortal />
-        ) : (
-          <AdminDashboard
-            onNavigateTab={setDashboardTab}
-            onOpenAiChat={() => setIsAiModalOpen(true)}
-          />
-        )
-      )}
+      <DashboardLayout
+        currentTab={dashboardTab}
+        onSelectTab={handleSelectDashboardTab}
+        onNavigateHome={() => handleNavigatePublic('home')}
+      >
+        {dashboardTab === 'dashboard' && (
+          role === 'student' ? (
+            <StudentPortal onOpenAiChat={() => setIsAiModalOpen(true)} />
+          ) : role === 'parent' ? (
+            <ParentPortal />
+          ) : (
+            <AdminDashboard
+              onNavigateTab={setDashboardTab}
+              onOpenAiChat={() => setIsAiModalOpen(true)}
+            />
+          )
+        )}
 
-      {dashboardTab === 'classes' && <ClassesBatches />}
-      {dashboardTab === 'students' && <StudentsList />}
-      {dashboardTab === 'teachers' && <TeachersList />}
-      {dashboardTab === 'attendance' && <AttendanceManager />}
-      {dashboardTab === 'courses' && <CourseSubjects />}
-      {dashboardTab === 'batches' && <ClassesBatches />}
-      {dashboardTab === 'admissions' && <AdmissionsManager />}
-      {dashboardTab === 'fees' && <FeeManagement />}
-      {dashboardTab === 'examinations' && <Examinations />}
-      {dashboardTab === 'timetable' && <Timetable />}
-      {dashboardTab === 'homework' && <CourseSubjects />}
-      {dashboardTab === 'library' && <CourseSubjects />}
-      {dashboardTab === 'communication' && <CommunicationNotice />}
-      {dashboardTab === 'reports' && <ReportsAnalytics />}
-      {dashboardTab === 'settings' && <SystemSettings />}
-      {dashboardTab === 'users' && <AuditSecurity />}
-      {dashboardTab === 'integrations' && <SystemSettings />}
-      {dashboardTab === 'audit' && <AuditSecurity />}
+        {dashboardTab === 'classes' && <ClassesBatches />}
+        {dashboardTab === 'students' && <StudentsList />}
+        {dashboardTab === 'teachers' && <TeachersList />}
+        {dashboardTab === 'attendance' && <AttendanceManager />}
+        {dashboardTab === 'courses' && <CourseSubjects />}
+        {dashboardTab === 'batches' && <ClassesBatches />}
+        {dashboardTab === 'admissions' && <AdmissionsManager />}
+        {dashboardTab === 'fees' && <FeeManagement />}
+        {dashboardTab === 'examinations' && <Examinations />}
+        {dashboardTab === 'timetable' && <Timetable />}
+        {dashboardTab === 'homework' && <CourseSubjects />}
+        {dashboardTab === 'library' && <CourseSubjects />}
+        {dashboardTab === 'communication' && <CommunicationNotice />}
+        {dashboardTab === 'reports' && <ReportsAnalytics />}
+        {dashboardTab === 'settings' && <SystemSettings />}
+        {dashboardTab === 'users' && <AuditSecurity />}
+        {dashboardTab === 'integrations' && <SystemSettings />}
+        {dashboardTab === 'audit' && <AuditSecurity />}
 
-      <AiAssistantModal
-        isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
-      />
-    </DashboardLayout>
+        <AiAssistantModal
+          isOpen={isAiModalOpen}
+          onClose={() => setIsAiModalOpen(false)}
+        />
+      </DashboardLayout>
+    </AdminRoute>
   );
 };
 

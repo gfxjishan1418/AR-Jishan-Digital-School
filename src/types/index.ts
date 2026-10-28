@@ -18,6 +18,9 @@ export interface UserProfile {
   studentId?: string; // If student
   childrenIds?: string[]; // If parent
   designation?: string; // If staff
+  isFirebaseAdmin?: boolean; // Verified server-side via custom claims
+  customClaims?: Record<string, any>;
+  authProvider?: 'firebase' | 'demo' | 'supabase';
 }
 
 export interface School {

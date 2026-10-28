@@ -77,12 +77,18 @@ const AppContent: React.FC = () => {
   };
 
   // Sync URL when navigating to dashboard
-  const handleOpenDashboard = (tab?: string) => {
-    const targetTab = tab || dashboardTab || 'dashboard';
+  const handleOpenDashboard = (tab?: any) => {
+    const targetTab = (typeof tab === 'string' && tab) ? tab : 'dashboard';
     setDashboardTab(targetTab);
     setView('dashboard');
     window.history.pushState(null, '', `/?view=dashboard${targetTab !== 'dashboard' ? `&tab=${targetTab}` : ''}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSelectDashboardTab = (tab: any) => {
+    const targetTab = (typeof tab === 'string' && tab) ? tab : 'dashboard';
+    setDashboardTab(targetTab);
+    window.history.pushState(null, '', `/?view=dashboard${targetTab !== 'dashboard' ? `&tab=${targetTab}` : ''}`);
   };
 
   // Sync state if user clicks browser Back/Forward buttons
@@ -152,7 +158,7 @@ const AppContent: React.FC = () => {
   return (
     <DashboardLayout
       currentTab={dashboardTab}
-      onSelectTab={setDashboardTab}
+      onSelectTab={handleSelectDashboardTab}
       onNavigateHome={() => handleNavigatePublic('home')}
     >
       {dashboardTab === 'dashboard' && (

@@ -8,7 +8,8 @@ import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { 
   Search, Plus, Download, Upload, Filter, Edit, 
-  Trash2, Eye, UserCheck, Phone, Mail, MapPin, Printer 
+  Trash2, Eye, UserCheck, Phone, Mail, MapPin, Printer,
+  Camera, UploadCloud, Image as ImageIcon, Sparkles 
 } from 'lucide-react';
 
 export const StudentsList: React.FC = () => {
@@ -41,7 +42,33 @@ export const StudentsList: React.FC = () => {
     status: 'Active',
     feeStatus: 'Paid',
     attendanceRate: 95,
+    photoUrl: '',
   });
+
+  const STUDENT_AVATAR_PRESETS = [
+    { label: 'Boy 1', url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80' },
+    { label: 'Girl 1', url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&auto=format&fit=crop&q=80' },
+    { label: 'Boy 2', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80' },
+    { label: 'Girl 2', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop&q=80' },
+    { label: 'Boy 3', url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80' },
+    { label: 'Girl 3', url: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&auto=format&fit=crop&q=80' },
+  ];
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 3 * 1024 * 1024) {
+        alert(isBangla ? 'ছবির সাইজ ৩ মেগাবাইটের কম হতে হবে।' : 'Image size must be under 3MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFormData(prev => ({ ...prev, photoUrl: base64 }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const filteredStudents = students.filter(s => {
     const matchSearch = 
@@ -66,6 +93,7 @@ export const StudentsList: React.FC = () => {
       const updatedStudent: Student = {
         ...activeStudent,
         ...formData as Student,
+        photoUrl: formData.photoUrl || activeStudent.photoUrl || STUDENT_AVATAR_PRESETS[0].url,
       };
       const list = StorageService.updateStudent(updatedStudent);
       setStudents(list);
@@ -74,7 +102,7 @@ export const StudentsList: React.FC = () => {
       const newStudent: Student = {
         id: `stu-${Date.now()}`,
         admissionNo: `ADM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        rollNo: Number(formData.rollNo) || 10,
+        rollNo: Number(formData.rollNo) || (students.length + 1),
         fullName: formData.fullName || '',
         banglaName: formData.banglaName,
         gender: formData.gender as any || 'Male',
@@ -89,7 +117,7 @@ export const StudentsList: React.FC = () => {
         guardianPhone: formData.guardianPhone || '',
         guardianRelation: formData.guardianRelation || 'Father',
         address: formData.address || 'Dhaka',
-        photoUrl: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&auto=format&fit=crop&q=80',
+        photoUrl: formData.photoUrl || (formData.gender === 'Female' ? STUDENT_AVATAR_PRESETS[1].url : STUDENT_AVATAR_PRESETS[0].url),
         status: 'Active',
         feeStatus: 'Paid',
         attendanceRate: 95,
@@ -173,6 +201,7 @@ export const StudentsList: React.FC = () => {
                 guardianRelation: 'Father',
                 status: 'Active',
                 feeStatus: 'Paid',
+                photoUrl: '',
               });
               setIsAddModalOpen(true);
             }}
@@ -352,6 +381,116 @@ export const StudentsList: React.FC = () => {
         maxWidth="2xl"
       >
         <form onSubmit={handleSaveStudent} className="space-y-4 text-xs">
+          {/* Photo Upload Section */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                {isBangla ? 'শিক্ষার্থীর ছবি (Student Photo)' : 'Student Photo / Profile Picture'}
+              </label>
+              {formData.photoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, photoUrl: '' })}
+                  className="text-[11px] text-rose-500 hover:underline cursor-pointer"
+                >
+                  {isBangla ? 'ছবি মুছুন' : 'Remove Photo'}
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Preview Avatar with quick upload button */}
+              <div className="relative group shrink-0">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-emerald-500/40 shadow-sm bg-slate-200 dark:bg-slate-700 flex items-center justify-center">
+                  {formData.photoUrl ? (
+                    <img
+                      src={formData.photoUrl}
+                      alt="Student preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center text-slate-400">
+                      <Camera className="w-6 h-6 stroke-[1.5]" />
+                      <span className="text-[10px] mt-1 font-medium">{isBangla ? 'ছবি নেই' : 'No photo'}</span>
+                    </div>
+                  )}
+                </div>
+
+                <label
+                  htmlFor="student-photo-file"
+                  className="absolute -bottom-1 -right-1 p-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-md cursor-pointer transition-transform active:scale-95"
+                  title={isBangla ? 'ডিভাইস থেকে ছবি আপলোড করুন' : 'Upload photo from device'}
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                </label>
+                <input
+                  id="student-photo-file"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Photo Input Controls */}
+              <div className="flex-1 w-full space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label
+                    htmlFor="student-photo-file-btn"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 cursor-pointer transition-colors shadow-2xs"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>{isBangla ? 'কম্পিউটার বা মোবাইল থেকে আপলোড' : 'Upload from Device (PC/Phone)'}</span>
+                  </label>
+                  <input
+                    id="student-photo-file-btn"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <span className="text-[11px] text-slate-400">{isBangla ? 'অথবা ওয়েব লিংক:' : 'or Image URL:'}</span>
+                </div>
+
+                {/* URL Input */}
+                <div className="relative">
+                  <ImageIcon className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+                  <input
+                    type="url"
+                    value={formData.photoUrl || ''}
+                    onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
+                    placeholder="https://... direct image link"
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl text-xs border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200"
+                  />
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex items-center gap-1.5 pt-0.5">
+                  <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    {isBangla ? 'রেডিমেড অবতার:' : 'Preset Avatars:'}
+                  </span>
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                    {STUDENT_AVATAR_PRESETS.map((preset, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, photoUrl: preset.url })}
+                        className={`w-6 h-6 rounded-lg overflow-hidden border transition-all cursor-pointer ${
+                          formData.photoUrl === preset.url
+                            ? 'ring-2 ring-emerald-500 border-white scale-110 shadow-sm'
+                            : 'border-slate-200 dark:border-slate-700 opacity-70 hover:opacity-100 hover:scale-105'
+                        }`}
+                        title={preset.label}
+                      >
+                        <img src={preset.url} alt={preset.label} className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-semibold mb-1">Full Name (English) *</label>

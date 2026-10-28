@@ -116,7 +116,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem('dai_current_user');
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      try {
+        const parsed = JSON.parse(saved);
+        // Auto-upgrade legacy demo admin to AR Jishan
+        if (parsed.email === 'ria.admin@digitalaischool.edu.bd' || parsed.id === 'usr-admin-01') {
+          localStorage.setItem('dai_current_user', JSON.stringify(DEMO_PROFILES.school_admin));
+          return DEMO_PROFILES.school_admin;
+        }
+        return parsed;
+      } catch (e) { /* ignore */ }
     }
     return DEMO_PROFILES.school_admin;
   });
